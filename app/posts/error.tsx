@@ -14,13 +14,13 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex items-center justify-center py-12">
       <div className="max-w-md mx-auto text-center">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-red-800 mb-2">
+        <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
             Error Loading Posts
           </h2>
-          <p className="text-red-600 mb-4">
+          <p className="text-red-600 dark:text-red-400 mb-4">
             {error.message ||
               "An unexpected error occurred while loading the posts."}
           </p>

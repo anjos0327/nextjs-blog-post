@@ -33,7 +33,7 @@ export function PostFilter({ users, currentUserId }: PostFilterProps) {
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
       <label
         htmlFor="user-filter"
-        className="text-sm font-medium text-gray-700"
+        className="text-sm font-medium text-gray-700 dark:text-gray-300"
       >
         Filter by User:
       </label>
@@ -41,7 +41,7 @@ export function PostFilter({ users, currentUserId }: PostFilterProps) {
         id="user-filter"
         value={currentUserId || "all"}
         onChange={(e) => handleUserChange(e.target.value)}
-        className="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className="block w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-emerald-500 focus:border-emerald-500"
       >
         <option value="all">All Users</option>
         {users.map((user) => (
@@ -53,7 +53,7 @@ export function PostFilter({ users, currentUserId }: PostFilterProps) {
       {currentUserId && (
         <button
           onClick={() => handleUserChange("all")}
-          className="text-sm text-indigo-600 hover:text-indigo-500"
+          className="text-sm text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
         >
           Clear filter
         </button>
