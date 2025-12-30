@@ -63,7 +63,7 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
           {showDelete && (
             <button
               onClick={() => setShowModal(true)}
-              className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900 rounded-md transition-colors"
+              className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900 rounded-md transition-colors cursor-pointer"
               disabled={isDeleting}
             >
               Delete

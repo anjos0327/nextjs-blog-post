@@ -1,17 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/lib/auth-context";
 
 interface HeaderProps {
   appName?: string;
 }
 
 export function Header({ appName = "BlogApp" }: HeaderProps) {
-  // Simular estado de autenticación (por ahora siempre false)
-  const [isLoggedIn] = useState(false);
+  const { user, logout, isLoading } = useAuth();
   const [showLogout, setShowLogout] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar dropdown cuando se hace click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowLogout(false);
+      }
+    };
+
+    if (showLogout) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLogout]);
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
@@ -32,7 +53,7 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
             {/* Theme Toggle - Always visible */}
             <ThemeToggle />
 
-            {!isLoggedIn ? (
+            {!user && !isLoading ? (
               // Not logged in - Show login/signup buttons
               <div className="flex items-center space-x-3">
                 <Link
@@ -49,35 +70,37 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
                 </Link>
               </div>
             ) : (
-              // Logged in - Show avatar with logout on hover
-              <div
-                className="relative"
-                onMouseEnter={() => setShowLogout(true)}
-                onMouseLeave={() => setShowLogout(false)}
-              >
-                <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      U
-                    </span>
-                  </div>
-                </button>
+              user &&
+              !isLoading && (
+                // Logged in - Show avatar with dropdown on click
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setShowLogout(!showLogout)}
+                  >
+                    <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  </button>
 
-                {/* Logout dropdown */}
-                {showLogout && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                    <button
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      onClick={() => {
-                        // TODO: Implement logout functionality
-                        console.log('Logout clicked');
-                      }}
-                    >
-                      Log out
-                    </button>
-                  </div>
-                )}
-              </div>
+                  {/* Logout dropdown */}
+                  {showLogout && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        onClick={() => {
+                          logout();
+                          setShowLogout(false);
+                        }}
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>
