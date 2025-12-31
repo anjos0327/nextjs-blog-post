@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: number;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Verificar si hay un usuario logueado al cargar la página
   useEffect(() => {
@@ -77,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error logging out:', error);
     } finally {
       setUser(null);
+      // Redirigir a la página principal después del logout
+      router.push('/');
     }
   };
 
