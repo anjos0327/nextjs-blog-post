@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear token JWT y establecer cookie
     const token = createToken(user);
     await setAuthCookie(token);
 

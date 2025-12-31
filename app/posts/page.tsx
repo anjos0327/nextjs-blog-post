@@ -100,7 +100,7 @@ export default function PostsPage() {
             {isLoggedIn && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-md transition-colors cursor-pointer"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-medium rounded-md transition-colors cursor-pointer"
               >
                 Create Post
               </button>

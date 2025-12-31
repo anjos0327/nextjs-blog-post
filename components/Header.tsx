@@ -58,13 +58,13 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
               <div className="flex items-center space-x-3">
                 <Link
                   href="/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-4 py-2 text-sm font-medium transition-colors"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-4 py-2 text-sm font-medium transition-colors cursor-pointer"
                 >
                   Log in
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer"
                 >
                   Sign up
                 </Link>
