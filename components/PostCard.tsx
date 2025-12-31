@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface Post {
   id: number;
@@ -38,11 +39,16 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
         throw new Error('Failed to delete post');
       }
 
+      // Show success notification
+      toast.success('Post deleted successfully!');
+
       // Refresh the page to update the list
       router.refresh();
       setShowModal(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
+      toast.error(`Failed to delete post: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
@@ -103,7 +109,7 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
                   setShowModal(false);
                   setError(null);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors cursor-pointer"
                 disabled={isDeleting}
               >
                 Cancel
@@ -111,7 +117,7 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-400 rounded-md transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-400 rounded-md transition-colors cursor-pointer"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>

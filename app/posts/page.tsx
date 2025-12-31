@@ -5,7 +5,10 @@ import { PostFilter } from "@/components/PostFilter";
 async function getPosts(userId?: string) {
   try {
     const posts = await prisma.post.findMany({
-      where: userId ? { userId: parseInt(userId) } : undefined,
+      where: {
+        deleted: false,
+        ...(userId ? { userId: parseInt(userId) } : {}),
+      },
       include: {
         user: {
           select: {

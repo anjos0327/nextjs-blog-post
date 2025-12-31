@@ -53,7 +53,7 @@ export function PostFilter({ users, currentUserId }: PostFilterProps) {
       {currentUserId && (
         <button
           onClick={() => handleUserChange("all")}
-          className="text-sm text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
+          className="text-sm text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300 cursor-pointer"
         >
           Clear filter
         </button>

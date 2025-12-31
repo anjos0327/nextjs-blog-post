@@ -2,9 +2,9 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function DELETE(
@@ -12,7 +12,8 @@ export async function DELETE(
   { params }: RouteParams
 ) {
   try {
-    const postId = parseInt(params.id);
+    const { id } = await params;
+    const postId = parseInt(id);
 
     if (isNaN(postId)) {
       return NextResponse.json(
@@ -33,9 +34,13 @@ export async function DELETE(
       );
     }
 
-    // Delete the post
-    await prisma.post.delete({
+    // Soft delete the post
+    await prisma.post.update({
       where: { id: postId },
+      data: {
+        deleted: true,
+        deletedAt: new Date(),
+      },
     });
 
     return NextResponse.json(
