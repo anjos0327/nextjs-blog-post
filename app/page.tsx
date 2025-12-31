@@ -4,9 +4,23 @@ import { prisma } from "@/lib/prisma";
 import { PostCard } from "@/components/PostCard";
 import { getCurrentUser } from "@/lib/auth";
 
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+  user: {
+    name: string;
+    username: string;
+  };
+}
+
 async function getRecentPosts() {
   try {
     const posts = await prisma.post.findMany({
+      where: {
+        deleted: false,
+      },
       take: 6, // Show only 6 recent posts on homepage
       include: {
         user: {
@@ -177,7 +191,7 @@ export default async function Home() {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
-            {recentPosts.map((post) => (
+            {recentPosts.map((post: Post) => (
               <PostCard key={post.id} post={post} showDelete={false} />
             ))}
           </div>

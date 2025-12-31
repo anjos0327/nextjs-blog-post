@@ -80,3 +80,14 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+/* Toast Notifications */
+:root {
+  --toast-bg: #ffffff;
+  --toast-text: #171717;
+}
+
+.dark {
+  --toast-bg: #374151;
+  --toast-text: #f9fafb;
+}

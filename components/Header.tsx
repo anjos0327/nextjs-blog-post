@@ -75,7 +75,7 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
                 // Logged in - Show avatar with dropdown on click
                 <div className="relative" ref={dropdownRef}>
                   <button
-                    className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                     onClick={() => setShowLogout(!showLogout)}
                   >
                     <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
@@ -89,7 +89,7 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
                   {showLogout && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                         onClick={() => {
                           logout();
                           setShowLogout(false);
