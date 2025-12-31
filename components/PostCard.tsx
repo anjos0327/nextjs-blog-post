@@ -18,9 +18,10 @@ interface Post {
 interface PostCardProps {
   post: Post;
   showDelete?: boolean;
+  onPostDeleted?: () => void;
 }
 
-export function PostCard({ post, showDelete = true }: PostCardProps) {
+export function PostCard({ post, showDelete = true, onPostDeleted }: PostCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,11 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
       toast.success('Post deleted successfully!');
 
       // Refresh the page to update the list
-      router.refresh();
+      if (onPostDeleted) {
+        onPostDeleted();
+      } else {
+        router.refresh();
+      }
       setShowModal(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
@@ -59,7 +64,7 @@ export function PostCard({ post, showDelete = true }: PostCardProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 capitalize">
               {post.title}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
