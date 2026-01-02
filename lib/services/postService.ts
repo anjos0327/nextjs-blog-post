@@ -17,12 +17,14 @@ import type { CreatePostInput, UpdatePostInput, PostFilters, PostWithAuthor } fr
  */
 export class PostService {
   /**
-   * Get all posts with optional filters
+   * Get all posts with optional filters and pagination
    */
-  static async getAllPosts(filters: PostFilters = {}): Promise<PostWithAuthor[]> {
+  static async getAllPosts(filters: PostFilters = {}): Promise<{ posts: PostWithAuthor[]; total: number; hasMore: boolean }> {
     try {
-      const { userId, includeDeleted = false } = filters;
+      const { userId, includeDeleted = false, page = 1, limit = 10 } = filters;
+      const skip = (page - 1) * limit;
 
+      // Get posts with pagination
       const posts = await prisma.post.findMany({
         where: {
           ...(userId && { userId }),
@@ -40,9 +42,21 @@ export class PostService {
         orderBy: {
           id: 'desc',
         },
+        skip,
+        take: limit,
       });
 
-      return posts;
+      // Get total count for pagination metadata
+      const total = await prisma.post.count({
+        where: {
+          ...(userId && { userId }),
+          ...(includeDeleted ? {} : { deleted: false }),
+        },
+      });
+
+      const hasMore = skip + posts.length < total;
+
+      return { posts, total, hasMore };
     } catch (error) {
       console.error('Error fetching posts:', error);
       throw new Error('Failed to fetch posts');

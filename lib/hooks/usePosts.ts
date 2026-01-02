@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { PostWithAuthor, PostFilters } from '@/lib/models';
+import type { PostWithAuthor, PostFilters, PostListResponse } from '@/lib/models';
 
 /**
  * Custom hook for managing posts state and operations
@@ -10,8 +10,11 @@ import type { PostWithAuthor, PostFilters } from '@/lib/models';
 export function usePosts(initialFilters?: PostFilters) {
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<PostFilters>(initialFilters || {});
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const filtersRef = useRef<PostFilters>(initialFilters || {});
 
   // Sync ref with state
@@ -20,12 +23,13 @@ export function usePosts(initialFilters?: PostFilters) {
   }, [filters]);
 
   /**
-   * Fetch posts from API
+   * Fetch initial posts from API (resets pagination)
    */
   const fetchPosts = useCallback(async (overrideFilters?: PostFilters) => {
     try {
       setLoading(true);
       setError(null);
+      setCurrentPage(1);
 
       const queryParams = new URLSearchParams();
       const activeFilters = overrideFilters || filtersRef.current;
@@ -33,6 +37,8 @@ export function usePosts(initialFilters?: PostFilters) {
       if (activeFilters.userId) {
         queryParams.set('userId', activeFilters.userId.toString());
       }
+      queryParams.set('page', '1');
+      queryParams.set('limit', (activeFilters.limit || 10).toString());
 
       const response = await fetch(`/api/posts?${queryParams.toString()}`);
 
@@ -40,8 +46,9 @@ export function usePosts(initialFilters?: PostFilters) {
         throw new Error(`Failed to fetch posts: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setPosts(data);
+      const data: PostListResponse = await response.json();
+      setPosts(data.posts);
+      setHasMore(data.hasMore);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
       console.error('Error fetching posts:', err);
@@ -50,6 +57,47 @@ export function usePosts(initialFilters?: PostFilters) {
       setLoading(false);
     }
   }, []); // Remove filters dependency to avoid loops
+
+  /**
+   * Load more posts for infinite scroll
+   */
+  const loadMorePosts = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+
+    try {
+      setLoadingMore(true);
+      setError(null);
+
+      const queryParams = new URLSearchParams();
+      const activeFilters = filtersRef.current;
+      const nextPage = currentPage + 1;
+
+      if (activeFilters.userId) {
+        queryParams.set('userId', activeFilters.userId.toString());
+      }
+      queryParams.set('page', nextPage.toString());
+      queryParams.set('limit', (activeFilters.limit || 10).toString());
+
+      const response = await fetch(`/api/posts?${queryParams.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch more posts: ${response.status} ${response.statusText}`);
+      }
+
+      const data: PostListResponse = await response.json();
+
+      // Append new posts to existing ones
+      setPosts(prevPosts => [...prevPosts, ...data.posts]);
+      setHasMore(data.hasMore);
+      setCurrentPage(nextPage);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load more posts';
+      console.error('Error loading more posts:', err);
+      setError(errorMessage);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, currentPage]);
 
   /**
    * Create a new post
@@ -128,12 +176,14 @@ export function usePosts(initialFilters?: PostFilters) {
   }, []);
 
   /**
-   * Update filters and refetch posts
+   * Update filters and refetch posts (resets pagination)
    */
   const updateFilters = useCallback((newFilters: Partial<PostFilters>) => {
     const updatedFilters = { ...filtersRef.current, ...newFilters };
     filtersRef.current = updatedFilters;
     setFilters(updatedFilters);
+    setCurrentPage(1);
+    setHasMore(true);
 
     // Fetch posts directly without using the callback to avoid dependency loop
     const fetchPostsDirectly = async () => {
@@ -146,6 +196,8 @@ export function usePosts(initialFilters?: PostFilters) {
         if (updatedFilters.userId) {
           queryParams.set('userId', updatedFilters.userId.toString());
         }
+        queryParams.set('page', '1');
+        queryParams.set('limit', (updatedFilters.limit || 10).toString());
 
         const response = await fetch(`/api/posts?${queryParams.toString()}`);
 
@@ -153,8 +205,9 @@ export function usePosts(initialFilters?: PostFilters) {
           throw new Error(`Failed to fetch posts: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
-        setPosts(data);
+        const data: PostListResponse = await response.json();
+        setPosts(data.posts);
+        setHasMore(data.hasMore);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
         console.error('Error fetching posts:', err);
@@ -187,9 +240,12 @@ export function usePosts(initialFilters?: PostFilters) {
   return {
     posts,
     loading,
+    loadingMore,
     error,
     filters,
+    hasMore,
     fetchPosts,
+    loadMorePosts,
     createPost,
     deletePost,
     updateFilters,

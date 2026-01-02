@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { PostCard } from "@/components/PostCard";
 import { PostFilter } from "@/components/PostFilter";
@@ -15,9 +15,12 @@ export default function PostsPage() {
   const {
     posts,
     loading: postsLoading,
+    loadingMore,
     error: postsError,
+    hasMore,
     createPost,
     deletePost,
+    loadMorePosts,
     updateFilters,
     clearError,
     refresh,
@@ -27,6 +30,35 @@ export default function PostsPage() {
   const { isAuthenticated } = useAuthCheck();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  // Handle infinite scroll
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries;
+    if (entry.isIntersecting && hasMore && !loadingMore && !postsLoading) {
+      loadMorePosts();
+    }
+  }, [hasMore, loadingMore, postsLoading, loadMorePosts]);
+
+  // Setup intersection observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleIntersection, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    });
+
+    const currentElement = observerRef.current;
+    if (currentElement) {
+      observer.observe(currentElement);
+    }
+
+    return () => {
+      if (currentElement) {
+        observer.unobserve(currentElement);
+      }
+    };
+  }, [handleIntersection]);
 
   // Initial fetch and update filters when currentUserId changes
   useEffect(() => {
@@ -51,8 +83,10 @@ export default function PostsPage() {
   const handlePostDeleted = async (postId: number) => {
     try {
       await deletePost(postId);
-    } catch {
-      // Error is handled by the hook
+      return true; // Indicate success
+    } catch (error) {
+      // Re-throw error so PostCard can handle it
+      throw error;
     }
   };
 
@@ -159,15 +193,41 @@ export default function PostsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onPostDeleted={handlePostDeleted}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  isAuthenticated={isAuthenticated}
+                  onPostDeleted={handlePostDeleted}
+                />
+              ))}
+            </div>
+
+            {/* Infinite scroll trigger and loading indicator */}
+            {hasMore && (
+              <div ref={observerRef} className="flex justify-center py-8">
+                {loadingMore ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
+                    <p className="text-gray-500 dark:text-gray-400">Loading more posts...</p>
+                  </div>
+                ) : (
+                  <div className="h-4"></div> // Invisible trigger element
+                )}
+              </div>
+            )}
+
+            {/* No more posts indicator */}
+            {!hasMore && posts.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 dark:text-gray-400">
+                  You&apos;ve reached the end of the posts.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 

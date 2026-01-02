@@ -43,6 +43,8 @@ export interface PostWithAuthor extends Omit<Post, 'user'> {
 export interface PostFilters {
   userId?: number;
   includeDeleted?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 /**

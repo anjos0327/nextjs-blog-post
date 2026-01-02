@@ -6,24 +6,49 @@ import type { CreatePostRequest, PostQueryParams } from '@/lib/types';
 
 /**
  * GET /api/posts
- * Retrieves posts with optional filtering
+ * Retrieves posts with optional filtering and pagination
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const queryParams: PostQueryParams = {
       userId: searchParams.get('userId') || undefined,
+      page: searchParams.get('page') || undefined,
+      limit: searchParams.get('limit') || undefined,
     };
 
     // Parse filters
     const filters = {
       userId: queryParams.userId ? parseInt(queryParams.userId) : undefined,
+      page: queryParams.page ? parseInt(queryParams.page) : 1,
+      limit: queryParams.limit ? parseInt(queryParams.limit) : 10,
     };
 
-    // Get posts using service
-    const posts = await PostService.getAllPosts(filters);
+    // Validate pagination parameters
+    if (filters.page < 1) {
+      return NextResponse.json(
+        { error: 'Page must be greater than 0' },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(posts);
+    if (filters.limit < 1 || filters.limit > 100) {
+      return NextResponse.json(
+        { error: 'Limit must be between 1 and 100' },
+        { status: 400 }
+      );
+    }
+
+    // Get posts using service
+    const result = await PostService.getAllPosts(filters);
+
+    return NextResponse.json({
+      posts: result.posts,
+      total: result.total,
+      hasMore: result.hasMore,
+      page: filters.page,
+      limit: filters.limit,
+    });
 
   } catch (error) {
     const { error: errorMessage, statusCode } = handleApiError(error);

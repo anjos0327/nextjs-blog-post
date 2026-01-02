@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { useAuthCheck } from '@/lib/hooks';
 import type { PostWithAuthor } from '@/lib/models';
 
 interface PostCardProps {
   post: PostWithAuthor;
   showDelete?: boolean;
+  isAuthenticated?: boolean;
   /**
    * Callback function called when a post is successfully deleted.
    * Receives the deleted post's ID as parameter.
@@ -16,12 +16,11 @@ interface PostCardProps {
   onPostDeleted?: (postId: number) => void;
 }
 
-export function PostCard({ post, showDelete = true, onPostDeleted }: PostCardProps) {
+export function PostCard({ post, showDelete = true, isAuthenticated = false, onPostDeleted }: PostCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { isAuthenticated } = useAuthCheck();
 
   const handleDelete = async () => {
     setIsDeleting(true);
