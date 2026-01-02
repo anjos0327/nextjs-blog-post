@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (email: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  isLoggingOut: boolean;
   isAuthenticated: boolean;
 }
 
@@ -23,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { user, isLoading, isAuthenticated, login, logout } = useAuthCheck();
+  const { user, isLoading, isLoggingOut, isAuthenticated, login, logout } = useAuthCheck();
 
   // Enhanced logout to include navigation
   const handleLogout = async () => {
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout: handleLogout,
       isLoading,
+      isLoggingOut,
       isAuthenticated
     }}>
       {children}

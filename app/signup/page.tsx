@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/auth-context';
 
 export default function SignupPage() {
@@ -42,6 +43,7 @@ export default function SignupPage() {
       const data = await response.json();
 
       if (response.ok) {
+        toast.success('Account created successfully! Welcome to BlogApp.');
         // Después del registro exitoso, hacer login automáticamente
         const loginSuccess = await login(formData.email);
         if (loginSuccess) {

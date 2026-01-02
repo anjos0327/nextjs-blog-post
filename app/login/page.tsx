@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
@@ -20,6 +21,7 @@ export default function LoginPage() {
     try {
       const success = await login(email);
       if (success) {
+        toast.success('Welcome back! You have been logged in successfully.');
         router.push('/');
       } else {
         setError('User not found. Please check your email or sign up first.');

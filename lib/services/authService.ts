@@ -1,5 +1,6 @@
 import { createToken, verifyToken, setAuthCookie, clearAuthCookie } from '@/lib/auth';
 import { UserService } from './userService';
+import { ValidationError } from '@/lib/utils';
 import type { UserPayload, LoginUserInput, CreateUserInput } from '@/lib/models';
 
 /**
@@ -28,7 +29,7 @@ export class AuthService {
       // Find user by email
       const user = await UserService.findByEmail(loginData.email);
       if (!user) {
-        throw new Error('User not found');
+        throw new ValidationError('Invalid email', 'email');
       }
 
       // Create and return token payload
@@ -132,13 +133,13 @@ export class AuthService {
    */
   private static validateLoginInput(input: LoginUserInput): void {
     if (!input.email?.trim()) {
-      throw new Error('Email is required');
+      throw new ValidationError('Email is required', 'email');
     }
 
     // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(input.email)) {
-      throw new Error('Invalid email format');
+      throw new ValidationError('Invalid email format', 'email');
     }
   }
 
@@ -148,36 +149,36 @@ export class AuthService {
    */
   private static validateSignupInput(input: CreateUserInput): void {
     if (!input.name?.trim()) {
-      throw new Error('Name is required');
+      throw new ValidationError('Name is required', 'name');
     }
 
     if (!input.username?.trim()) {
-      throw new Error('Username is required');
+      throw new ValidationError('Username is required', 'username');
     }
 
     if (!input.email?.trim()) {
-      throw new Error('Email is required');
+      throw new ValidationError('Email is required', 'email');
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(input.email)) {
-      throw new Error('Invalid email format');
+      throw new ValidationError('Invalid email format', 'email');
     }
 
     // Username validation (alphanumeric, underscore, dash only)
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!usernameRegex.test(input.username)) {
-      throw new Error('Username can only contain letters, numbers, underscores, and dashes');
+      throw new ValidationError('Username can only contain letters, numbers, underscores, and dashes', 'username');
     }
 
     // Length validations
     if (input.name.trim().length < 2) {
-      throw new Error('Name must be at least 2 characters long');
+      throw new ValidationError('Name must be at least 2 characters long', 'name');
     }
 
     if (input.username.trim().length < 3) {
-      throw new Error('Username must be at least 3 characters long');
+      throw new ValidationError('Username must be at least 3 characters long', 'username');
     }
   }
 }

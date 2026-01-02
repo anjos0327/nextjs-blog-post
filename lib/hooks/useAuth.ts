@@ -10,6 +10,7 @@ import type { User } from '@/lib/models';
 export function useAuthCheck() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   /**
@@ -85,15 +86,24 @@ export function useAuthCheck() {
    */
   const logout = useCallback(async () => {
     try {
+      setIsLoggingOut(true);
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
+
+      // Import toast dynamically to avoid SSR issues
+      const toast = (await import('react-hot-toast')).default;
+      toast.success('You have been logged out successfully.');
     } catch (error) {
       console.error('Error logging out:', error);
+      // Import toast dynamically to avoid SSR issues
+      const toast = (await import('react-hot-toast')).default;
+      toast.error('Failed to log out. Please try again.');
     } finally {
       setUser(null);
       setIsAuthenticated(false);
+      setIsLoggingOut(false);
     }
   }, []);
 
@@ -113,6 +123,7 @@ export function useAuthCheck() {
   return {
     user,
     isLoading,
+    isLoggingOut,
     isAuthenticated,
     login,
     logout,

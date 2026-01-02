@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ValidationError, ConflictError } from '@/lib/utils';
 import type { User, CreateUserInput, UserProfile } from '@/lib/models';
 
 /**
@@ -82,7 +83,7 @@ export class UserService {
     } catch (error) {
       console.error('Error creating user:', error);
       if (error instanceof Error && error.message.includes('Unique constraint')) {
-        throw new Error('User with this email or username already exists');
+        throw new ConflictError('User with this email or username already exists');
       }
       throw new Error('Failed to create user');
     }
@@ -151,36 +152,36 @@ export class UserService {
    */
   private static validateCreateUserInput(input: CreateUserInput): void {
     if (!input.name?.trim()) {
-      throw new Error('Name is required');
+      throw new ValidationError('Name is required', 'name');
     }
 
     if (!input.username?.trim()) {
-      throw new Error('Username is required');
+      throw new ValidationError('Username is required', 'username');
     }
 
     if (!input.email?.trim()) {
-      throw new Error('Email is required');
+      throw new ValidationError('Email is required', 'email');
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(input.email)) {
-      throw new Error('Invalid email format');
+      throw new ValidationError('Invalid email format', 'email');
     }
 
     // Username validation (alphanumeric, underscore, dash only)
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!usernameRegex.test(input.username)) {
-      throw new Error('Username can only contain letters, numbers, underscores, and dashes');
+      throw new ValidationError('Username can only contain letters, numbers, underscores, and dashes', 'username');
     }
 
     // Length validations
     if (input.name.trim().length < 2) {
-      throw new Error('Name must be at least 2 characters long');
+      throw new ValidationError('Name must be at least 2 characters long', 'name');
     }
 
     if (input.username.trim().length < 3) {
-      throw new Error('Username must be at least 3 characters long');
+      throw new ValidationError('Username must be at least 3 characters long', 'username');
     }
 
   }

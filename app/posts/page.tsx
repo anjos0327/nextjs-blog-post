@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { PostCard } from "@/components/PostCard";
 import { PostFilter } from "@/components/PostFilter";
 import { CreatePostModal } from "@/components/CreatePostModal";
+import { PostsSkeleton } from "@/components/PostSkeleton";
 import { usePosts, useUsers, useAuthCheck } from "@/lib/hooks";
 
 export default function PostsPage() {
@@ -26,7 +27,7 @@ export default function PostsPage() {
     refresh,
   } = usePosts();
 
-  const { users, error: usersError } = useUsers();
+  const { users, loading: usersLoading, error: usersError } = useUsers();
   const { isAuthenticated } = useAuthCheck();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -94,12 +95,14 @@ export default function PostsPage() {
     return (
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-4">
-              Loading posts...
-            </p>
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Blog Posts
+              </h1>
+            </div>
           </div>
+          <PostsSkeleton count={6} />
         </div>
       </div>
     );
@@ -152,7 +155,14 @@ export default function PostsPage() {
             )}
           </div>
           <div className="mt-4">
-            <PostFilter users={users} currentUserId={currentUserId} />
+            {usersLoading ? (
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
+              </div>
+            ) : (
+              <PostFilter users={users} currentUserId={currentUserId} />
+            )}
           </div>
         </div>
 

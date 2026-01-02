@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
+import { handleApiError } from '@/lib/utils';
 
 export async function GET() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    return NextResponse.json(null);
+  try {
+    const user = await getCurrentUser();
+    return NextResponse.json(user);
+  } catch (error) {
+    const { error: errorMessage, statusCode } = handleApiError(error);
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: statusCode }
+    );
   }
-
-  return NextResponse.json(user);
 }

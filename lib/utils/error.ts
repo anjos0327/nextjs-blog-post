@@ -52,6 +52,16 @@ export class NotFoundError extends ApiError {
 }
 
 /**
+ * Custom error class for conflict errors
+ */
+export class ConflictError extends ApiError {
+  constructor(message: string = 'Conflict') {
+    super(message, 409, 'CONFLICT');
+    this.name = 'ConflictError';
+  }
+}
+
+/**
  * Handle async errors in API routes
  */
 export function handleApiError(error: unknown): {
@@ -59,7 +69,10 @@ export function handleApiError(error: unknown): {
   statusCode: number;
   code?: string;
 } {
-  console.error('API Error:', error);
+  // Don't log validation errors as server errors - they're expected client errors
+  if (!(error instanceof ValidationError)) {
+    console.error('API Error:', error);
+  }
 
   if (error instanceof ApiError) {
     return {

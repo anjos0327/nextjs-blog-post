@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ValidationError } from '@/lib/utils';
 import type { CreatePostInput, UpdatePostInput, PostFilters, PostWithAuthor } from '@/lib/models';
 
 /**
@@ -282,19 +283,19 @@ export class PostService {
    */
   private static validateCreatePostInput(input: CreatePostInput): void {
     if (!input.title?.trim()) {
-      throw new Error('Title is required');
+      throw new ValidationError('Title is required', 'title');
     }
 
     if (!input.body?.trim()) {
-      throw new Error('Body is required');
+      throw new ValidationError('Body is required', 'body');
     }
 
     if (input.title.trim().length < 3) {
-      throw new Error('Title must be at least 3 characters long');
+      throw new ValidationError('Title must be at least 3 characters long', 'title');
     }
 
     if (input.body.trim().length < 10) {
-      throw new Error('Body must be at least 10 characters long');
+      throw new ValidationError('Body must be at least 10 characters long', 'body');
     }
   }
 
@@ -304,19 +305,19 @@ export class PostService {
    */
   private static validateUpdatePostInput(input: UpdatePostInput): void {
     if (input.title !== undefined && !input.title.trim()) {
-      throw new Error('Title cannot be empty');
+      throw new ValidationError('Title cannot be empty', 'title');
     }
 
     if (input.body !== undefined && !input.body.trim()) {
-      throw new Error('Body cannot be empty');
+      throw new ValidationError('Body cannot be empty', 'body');
     }
 
     if (input.title !== undefined && input.title.trim().length < 3) {
-      throw new Error('Title must be at least 3 characters long');
+      throw new ValidationError('Title must be at least 3 characters long', 'title');
     }
 
     if (input.body !== undefined && input.body.trim().length < 10) {
-      throw new Error('Body must be at least 10 characters long');
+      throw new ValidationError('Body must be at least 10 characters long', 'body');
     }
   }
 }
