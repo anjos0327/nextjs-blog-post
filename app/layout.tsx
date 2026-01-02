@@ -18,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BlogApp - Share Your Thoughts",
-  description: "A modern blog application for sharing posts and connecting with others",
+  description:
+    "A modern blog application for sharing posts and connecting with others",
 };
 
 export default function RootLayout({
@@ -31,23 +32,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             <Header />
-            <main className="min-h-screen">
-              {children}
-            </main>
+            <main className="min-h-screen">{children}</main>
             <Toaster
               position="bottom-right"
               toastOptions={{
                 duration: 3000,
                 style: {
-                  background: 'var(--toast-bg)',
-                  color: 'var(--toast-text)',
+                  background: "var(--toast-bg)",
+                  color: "var(--toast-text)",
                 },
               }}
             />

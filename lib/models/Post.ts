@@ -23,14 +23,6 @@ export interface CreatePostInput {
 }
 
 /**
- * Post update input - used for updating existing posts
- */
-export interface UpdatePostInput {
-  title?: string;
-  body?: string;
-}
-
-/**
  * Post with author information - for display purposes
  */
 export interface PostWithAuthor extends Omit<Post, 'user'> {

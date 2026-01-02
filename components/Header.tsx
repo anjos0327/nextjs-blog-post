@@ -14,7 +14,6 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
   const [showLogout, setShowLogout] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar dropdown cuando se hace click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -38,7 +37,6 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand - Left Side */}
           <div className="flex items-center">
             <Link
               href="/"
@@ -48,13 +46,10 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
             </Link>
           </div>
 
-          {/* Navigation/Authentication - Right Side */}
           <div className="flex items-center space-x-4">
-            {/* Theme Toggle - Always visible */}
             <ThemeToggle />
 
             {!user && !isLoading ? (
-              // Not logged in - Show login/signup buttons
               <div className="flex items-center space-x-3">
                 <Link
                   href="/login"
@@ -72,7 +67,6 @@ export function Header({ appName = "BlogApp" }: HeaderProps) {
             ) : (
               user &&
               !isLoading && (
-                // Logged in - Show avatar with dropdown on click
                 <div className="relative" ref={dropdownRef}>
                   <button
                     className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"

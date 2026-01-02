@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { useForm } from "@/lib/hooks";
+import { useForm, useCreatePost } from "@/lib/hooks";
 import { validatePostInput } from "@/lib/utils";
 
 interface CreatePostModalProps {
@@ -18,25 +17,29 @@ export function CreatePostModal({
   onPostCreated,
 }: CreatePostModalProps) {
   const router = useRouter();
+  const { createPost: createPostDirect } = useCreatePost();
 
   // Validation function that returns the format expected by useForm
-  const validateForm = (formData: { title: string; body: string }): Record<string, string> => {
+  const validateForm = (formData: {
+    title: string;
+    body: string;
+  }): Record<string, string> => {
     const result = validatePostInput(formData);
     const errors: Record<string, string> = {};
 
-    // Map validation errors to field-specific messages
     if (!result.isValid) {
-      // For simplicity, we'll assign errors to specific fields based on content
-      // In a more complex scenario, you'd modify validatePostInput to return field-specific errors
-      if (result.errors.some(error => error.includes('Title'))) {
-        errors.title = result.errors.find(error => error.includes('Title')) || 'Title error';
+      if (result.errors.some((error) => error.includes("Title"))) {
+        errors.title =
+          result.errors.find((error) => error.includes("Title")) ||
+          "Title error";
       }
-      if (result.errors.some(error => error.includes('Content'))) {
-        errors.body = result.errors.find(error => error.includes('Content')) || 'Content error';
+      if (result.errors.some((error) => error.includes("Content"))) {
+        errors.body =
+          result.errors.find((error) => error.includes("Content")) ||
+          "Content error";
       }
-      // If we can't map specific errors, put them in a general field
       if (Object.keys(errors).length === 0 && result.errors.length > 0) {
-        errors.title = result.errors[0]; // Default to title for backwards compatibility
+        errors.title = result.errors[0];
       }
     }
 
@@ -57,33 +60,17 @@ export function CreatePostModal({
       // Toast is handled by the parent component
       onClose();
     } else {
-      // Fallback to direct API call if no callback provided
-      try {
-        const response = await fetch("/api/posts", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            title: data.title.trim(),
-            body: data.body.trim(),
-          }),
-        });
+      // Use the custom hook for direct API call
+      const result = await createPostDirect({
+        title: data.title.trim(),
+        body: data.body.trim(),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to create post");
-        }
-
-        toast.success("Post created successfully");
+      if (result.success) {
         onClose();
         router.refresh();
-      } catch (error) {
-        console.error("Error creating post:", error);
-        toast.error(
-          error instanceof Error ? error.message : "Unable to create post. Please check your input and try again."
-        );
       }
+      // Error handling is done by the hook (toast notifications)
     }
   };
 
@@ -97,8 +84,8 @@ export function CreatePostModal({
   useEffect(() => {
     if (!isOpen) {
       // Reset form data when modal closes
-      setValue('title', '');
-      setValue('body', '');
+      setValue("title", "");
+      setValue("body", "");
     }
   }, [isOpen, setValue]);
 

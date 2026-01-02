@@ -38,7 +38,7 @@ export function ThemeToggle() {
       suppressHydrationWarning
     >
       {resolvedTheme === "dark" ? (
-        // Sun Icon (will switch to light mode)
+        // Sun Icon
         <svg
           className="w-5 h-5 text-yellow-500 dark:text-yellow-400"
           fill="none"
@@ -53,7 +53,7 @@ export function ThemeToggle() {
           />
         </svg>
       ) : (
-        // Moon Icon (will switch to dark mode)
+        // Moon Icon
         <svg
           className="w-5 h-5 text-gray-700 dark:text-gray-300"
           fill="none"

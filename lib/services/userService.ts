@@ -30,28 +30,6 @@ export class UserService {
   }
 
   /**
-   * Find a user by ID
-   */
-  static async findById(id: number): Promise<User | null> {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          email: true,
-        },
-      });
-
-      return user;
-    } catch (error) {
-      console.error('Error finding user by ID:', error);
-      throw new Error('Failed to find user');
-    }
-  }
-
-  /**
    * Create a new user
    */
   static async create(userData: CreateUserInput): Promise<User> {

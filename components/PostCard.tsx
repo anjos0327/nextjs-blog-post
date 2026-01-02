@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import type { PostWithAuthor } from '@/lib/models';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useDeletePost } from "@/lib/hooks";
+import type { PostWithAuthor } from "@/lib/models";
 
 interface PostCardProps {
   post: PostWithAuthor;
@@ -16,67 +17,38 @@ interface PostCardProps {
   onPostDeleted?: (postId: number) => void;
 }
 
-export function PostCard({ post, showDelete = true, isAuthenticated = false, onPostDeleted }: PostCardProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
+export function PostCard({
+  post,
+  showDelete = true,
+  isAuthenticated = false,
+  onPostDeleted,
+}: PostCardProps) {
   const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { deletePost: deletePostDirect, isLoading: isDeleting } =
+    useDeletePost();
   const router = useRouter();
 
   const handleDelete = async () => {
-    setIsDeleting(true);
-    setError(null);
-
     try {
       // Use callback if provided (preferred approach for component composition)
       if (onPostDeleted) {
         await onPostDeleted(post.id);
-        toast.success('Post deleted successfully');
+        toast.success("Post deleted successfully");
         setShowModal(false);
       } else {
-        // Fallback: direct API call (for standalone usage)
-        const response = await fetch(`/api/posts/${post.id}`, {
-          method: 'DELETE',
-        });
+        // Use the custom hook for direct API call
+        const result = await deletePostDirect(post.id);
 
-        if (!response.ok) {
-          let errorMessage = 'Failed to delete post';
-
-          // Try to get specific error message from server
-          try {
-            const errorData = await response.json();
-            if (errorData && errorData.error) {
-              errorMessage = errorData.error;
-            } else {
-              errorMessage = 'Failed to delete post';
-            }
-          } catch {
-            // If we can't parse JSON, try to get text response
-            try {
-              const textResponse = await response.text();
-              if (textResponse) {
-                errorMessage = textResponse;
-              } else {
-                errorMessage = 'Failed to delete post';
-              }
-            } catch {
-              errorMessage = 'Failed to delete post';
-            }
-          }
-
-          throw new Error(errorMessage);
+        if (result.success) {
+          router.refresh();
+          setShowModal(false);
         }
-
-        // Show success notification
-        toast.success('Post deleted successfully');
-        router.refresh();
-        setShowModal(false);
+        // Error handling is done by the hook (toast notifications)
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       toast.error(`Failed to delete post: ${errorMessage}`);
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -103,13 +75,9 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
           )}
         </div>
 
-        <p className="text-gray-700 dark:text-gray-300 line-clamp-3">{post.body}</p>
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
-        )}
+        <p className="text-gray-700 dark:text-gray-300 line-clamp-3">
+          {post.body}
+        </p>
       </div>
 
       {/* Delete Confirmation Modal */}
@@ -120,20 +88,14 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
               Confirm Delete
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete the post &quot;{post.title}&quot;? This action cannot be undone.
+              Are you sure you want to delete the post &quot;{post.title}&quot;?
+              This action cannot be undone.
             </p>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
-            )}
 
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setError(null);
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors cursor-pointer"
                 disabled={isDeleting}
@@ -145,7 +107,7 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
                 disabled={isDeleting}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-red-400 rounded-md transition-colors cursor-pointer"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>
           </div>
