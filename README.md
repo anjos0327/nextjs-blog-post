@@ -1,234 +1,312 @@
 # 📝 Next.js Blog Post App
 
-Una aplicación web moderna para gestión de posts de blog construida con Next.js 13+, TypeScript y Prisma.
+A web application for blog post management built with Next.js 13+, TypeScript, and Prisma.
 
-## ✨ Características
+## ✨ Features
 
-- 📝 **Gestión de Posts**: Crear, leer y eliminar posts de blog
-- 👥 **Sistema de Usuarios**: Autenticación JWT con registro y login
-- 🔍 **Filtrado Avanzado**: Filtrar posts por autor
-- 🌓 **Tema Oscuro/Claro**: Soporte completo para temas
-- 📱 **Responsive Design**: Optimizado para móviles y desktop
-- ⚡ **Manejo de Errores**: Experiencia robusta con conexiones inestables
-- 🗃️ **Base de Datos**: SQLite con Prisma ORM
-- 🔄 **Soft Delete**: Eliminación lógica de posts
+- 📝 **Post Management**: Create, read, and delete blog posts
+- 👥 **User System**: JWT authentication with registration and login
+- 🔍 **Advanced Filtering**: Filter posts by author (userId)
+- 🌓 **Dark/Light Theme**: Full theme support
+- 📱 **Responsive Design**: Optimized for mobile and desktop
+- ⚡ **Error Handling**: Robust experience with unstable connections
+- 🗃️ **Database**: SQLite with Prisma ORM
+- 🔄 **Soft Delete**: Logical deletion of posts
+- 🔐 **Route Protection**: Authentication required for create/delete operations
+- 📊 **Loading States**: Visual indicators during async operations
+- 🎯 **Enhanced UX**: Confirmation modals, toast notifications, intuitive navigation
 
-## 🚀 Tecnologías Utilizadas
+### 📁 Folders Structure 
+
+```
+lib/
+├── models/           # Centralized data models
+│   ├── User.ts      # User interfaces and types
+│   ├── Post.ts      # Post interfaces and types
+│   └── index.ts     # Centralized exports
+├── types/           # API and response types
+│   ├── api.ts       # API response/error types
+│   └── index.ts     # Centralized exports
+├── services/        # Business services
+│   ├── userService.ts    # User business logic
+│   ├── postService.ts    # Post business logic
+│   ├── authService.ts    # Authentication logic
+│   └── index.ts          # Centralized exports
+├── utils/           # Reusable utilities
+│   ├── validation.ts     # Validation functions
+│   ├── format.ts         # Formatting functions
+│   ├── error.ts          # Error handling
+│   └── index.ts          # Centralized exports
+├── hooks/           # Custom React hooks
+│   ├── usePosts.ts       # Hook for post management
+│   ├── useUsers.ts       # Hook for user management
+│   ├── useAuth.ts        # Hook for authentication
+│   ├── useForm.ts        # Generic form hook
+│   └── index.ts          # Centralized exports
+└── auth.ts          # Authentication utilities (JWT)
+```
+
+## 🚀 Technologies Used
 
 ### Core Framework
-- **Next.js** 16.1.1 - React framework con App Router
-- **React** 19.2.3 - Biblioteca de UI
-- **TypeScript** 5.x - Tipado estático
+- **Next.js** 16.1.1 - with App Router
+- **React** 19.2.3
+- **TypeScript** 5.x
 
-### Base de Datos & ORM
-- **Prisma** 7.2.0 - ORM moderno para TypeScript
-- **SQLite** - Base de datos embebida
-- **@prisma/adapter-libsql** 7.2.0 - Adaptador para SQLite
+### Database & ORM
+- **Prisma** 7.2.0
+- **SQLite**
+- **@prisma/adapter-libsql** 7.2.0
 
-### Autenticación
-- **jsonwebtoken** 9.0.3 - Tokens JWT para autenticación
-- **@types/jsonwebtoken** 9.0.10 - Tipos para JWT
+### Authentication
+- **jsonwebtoken** 9.0.3 - JWT tokens for authentication
+- **@types/jsonwebtoken** 9.0.10 - Types for JWT
 
-### UI & Estilos
-- **Tailwind CSS** 4.x - Framework de CSS utilitario
-- **next-themes** 0.4.6 - Gestión de temas para Next.js
-- **react-hot-toast** 2.6.0 - Notificaciones toast
+### UI & Styling
+- **Tailwind CSS** 4.x - Utility-first CSS framework
+- **next-themes** 0.4.6 - Theme management for Next.js
+- **react-hot-toast** 2.6.0 - Toast notifications
 
-### Desarrollo
-- **ESLint** 9.x - Linting de código
-- **tsx** 4.21.0 - Ejecutor TypeScript
-- **dotenv** 17.2.3 - Variables de entorno
+### Development
+- **ESLint** 9.x - Code linting
+- **tsx** 4.21.0 - TypeScript executor
+- **dotenv** 17.2.3 - Environment variables
 
-## 📋 Prerrequisitos
+## 📋 Prerequisites
 
-- **Node.js** 18.x o superior
-- **npm** 8.x o superior (viene incluido con Node.js)
-- **Git** para control de versiones
+- **Node.js** 18.x or higher
+- **npm** 8.x or higher (comes with Node.js)
+- **Git** for version control
 
-## 🛠️ Instalación y Configuración
+## 🛠️ Installation and Setup
 
-### 1. Clona el repositorio
+### 1. Clone the repository
 ```bash
 git clone https://github.com/anjos0327/nextjs-blog-post.git
 cd nextjs-blog-post
 ```
 
-### 2. Instala las dependencias
+### 2. Install dependencies
 ```bash
 npm install
 ```
 
-### 3. Configura la base de datos
+### 3. Configure the database
 ```bash
-# Genera el cliente de Prisma
+# Generate Prisma client
 npm run db:generate
 
-# Ejecuta las migraciones
+# Run migrations
 npm run db:migrate
 
-# Siembra la base de datos con datos de ejemplo
+# Seed the database with sample data
 npm run db:seed
 ```
 
-### 4. Inicia el servidor de desarrollo
+### 4. Start the development server
 ```bash
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-## 📜 Scripts Disponibles
+## 📜 Available Scripts
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `npm run dev` | Inicia el servidor de desarrollo |
-| `npm run build` | Construye la aplicación para producción |
-| `npm run start` | Inicia el servidor de producción |
-| `npm run lint` | Ejecuta ESLint para verificar el código |
-| `npm run db:generate` | Genera el cliente de Prisma |
-| `npm run db:migrate` | Ejecuta migraciones de base de datos |
-| `npm run db:push` | Sincroniza el esquema con la base de datos |
-| `npm run db:seed` | Siembra la base de datos con datos de ejemplo |
-| `npm run db:reset` | Resetea la base de datos completamente |
-| `npm run db:studio` | Abre Prisma Studio (interfaz gráfica de BD) |
+| `npm run dev` | Starts the development server |
+| `npm run build` | Builds the application for production |
+| `npm run start` | Starts the production server |
+| `npm run lint` | Runs ESLint to check code |
+| `npm run db:generate` | Generates the Prisma client |
+| `npm run db:migrate` | Runs database migrations |
+| `npm run db:push` | Syncs schema with database |
+| `npm run db:seed` | Seeds database with sample data |
+| `npm run db:reset` | Completely resets the database |
+| `npm run db:studio` | Opens Prisma Studio (database GUI) |
 
-## 🗂️ Estructura del Proyecto
+## 🗂️ Project Structure
 
 ```
 nextjs-blog-post/
-├── app/                    # Páginas y rutas API (App Router)
-│   ├── api/               # Endpoints de API
-│   │   ├── auth/         # Autenticación (login, signup, logout)
-│   │   ├── posts/        # CRUD de posts
-│   │   └── users/        # Gestión de usuarios
-│   ├── posts/            # Página de listado de posts
-│   ├── login/            # Página de login
-│   ├── signup/           # Página de registro
-│   └── page.tsx          # Página principal
-├── components/           # Componentes reutilizables
-│   ├── PostCard.tsx     # Tarjeta de post individual
-│   ├── PostFilter.tsx   # Filtro de posts por usuario
-│   ├── CreatePostModal.tsx # Modal para crear posts
-│   ├── Header.tsx       # Barra de navegación
-│   └── ThemeToggle.tsx  # Alternador de tema
-├── lib/                 # Utilidades y configuración
-│   ├── prisma.ts        # Cliente de Prisma
-│   ├── auth.ts          # Utilidades de autenticación
-│   └── auth-context.tsx # Contexto de autenticación
-├── prisma/              # Configuración de base de datos
-│   ├── schema.prisma    # Esquema de base de datos
-│   ├── seed.ts         # Script de siembra
-│   └── migrations/     # Migraciones de base de datos
-├── public/             # Archivos estáticos
-├── .env                # Variables de entorno
-├── assumptions.md      # Presunciones del desarrollo
-└── package.json        # Dependencias y scripts
+├── app/                    # Pages and API routes (App Router)
+│   ├── api/               # API endpoints
+│   │   ├── auth/         # Authentication (login, signup, logout)
+│   │   ├── posts/        # Posts CRUD
+│   │   └── users/        # User management
+│   ├── posts/            # Posts listing page
+│   ├── login/            # Login page
+│   ├── signup/           # Registration page
+│   └── page.tsx          # Main page
+├── components/           # Reusable components
+│   ├── PostCard.tsx     # Individual post card
+│   ├── PostFilter.tsx   # Posts filter by user
+│   ├── CreatePostModal.tsx # Modal for creating posts
+│   ├── Header.tsx       # Navigation bar
+│   └── ThemeToggle.tsx  # Theme toggle
+├── lib/                 # Utilities and configuration
+│   ├── prisma.ts        # Prisma client
+│   ├── auth.ts          # Authentication utilities
+│   └── auth-context.tsx # Authentication context
+├── prisma/              # Database configuration
+│   ├── schema.prisma    # Database schema
+│   ├── seed.ts         # Seeding script
+│   └── migrations/     # Database migrations
+├── public/             # Static files
+├── .env                # Environment variables
+├── assumptions.md      # Development assumptions
+└── package.json        # Dependencies and scripts
 ```
 
-## 🗄️ Base de Datos
+## 🗄️ Database
 
-La aplicación utiliza SQLite con Prisma ORM. El esquema incluye dos modelos principales:
+The application uses SQLite with Prisma ORM. The schema includes two main models:
 
 ### User
-- `id`: Identificador único (autoincremental)
-- `name`: Nombre completo del usuario
-- `username`: Nombre de usuario único
-- `email`: Correo electrónico único
+- `id`: Unique identifier (auto-incremental)
+- `name`: User's full name
+- `username`: Unique username
+- `email`: Unique email address
 
 ### Post
-- `id`: Identificador único (autoincremental)
-- `title`: Título del post
-- `body`: Contenido del post
-- `userId`: ID del autor (relación con User)
-- `deleted`: Flag de eliminación lógica
-- `deletedAt`: Timestamp de eliminación (opcional)
+- `id`: Unique identifier (auto-incremental)
+- `title`: Post title
+- `body`: Post content
+- `userId`: Author ID (relationship with User)
+- `deleted`: Soft delete flag
+- `deletedAt`: Deletion timestamp (optional)
 
-## 🔐 Autenticación
+## 🔐 Authentication
 
-La aplicación implementa autenticación JWT con las siguientes características:
+The application implements JWT authentication with the following features:
 
-- **Registro**: Crear nueva cuenta de usuario
-- **Login**: Autenticación con email/username y password
-- **Protección de rutas**: Rutas que requieren autenticación
-- **Persistencia**: Sesión mantenida en cookies HTTP-only
+- **Registration**: Create new user account
+- **Login**: Authentication with email
+- **Route Protection**: Routes requiring authentication
+- **Persistence**: Session maintained in HTTP-only cookies
 
 ## 🎨 Funcionalidades
 
-### Para Usuarios No Autenticados
-- Ver posts recientes en la página principal
-- Navegar a la página completa de posts
-- Filtrar posts por autor
-- Ver detalles de posts
+### ✅ Original Requirements Fulfilled
 
-### Para Usuarios Autenticados
-- Todas las funcionalidades anteriores, más:
-- Crear nuevos posts
-- Eliminar posts propios (con confirmación)
-- Acceso automático a la página de posts al iniciar sesión
+#### 📋 Posts Listing
+- ✅ `/posts` page with posts listed in card format
+- ✅ Posts filtering by `userId` (post author)
+- ✅ Responsive and modern interface
+
+#### 🗑️ Post Deletion
+- ✅ "Delete" button on each post card
+- ✅ Confirmation modal before deletion
+- ✅ Soft delete (logical deletion)
+
+#### ⚠️ Error Handling
+- ✅ Error states for post loading failures
+- ✅ Error states for deletion failures
+- ✅ User-friendly error messages
+- ✅ "Retry" buttons for error cases
+
+### 🚀 Additional Features (Beyond Requirements)
+
+#### 👥 Authentication System
+- ✅ User registration (`/signup`)
+- ✅ User login (`/login`)
+- ✅ Secure logout
+- ✅ Route protection (create/delete posts requires authentication)
+- ✅ Session persistence with JWT in HTTP-only cookies
+
+#### 📱 Enhanced Experience for Unstable Connections
+- ✅ Loading states during async operations
+- ✅ Automatic retries on network failures
+- ✅ Informative error messages
+- ✅ Interface optimized for slow connections
+- ✅ Immediate visual feedback (toast notifications)
+
+#### 🎨 Advanced User Interface
+- ✅ Dark/light theme with persistence
+- ✅ Responsive design (mobile and desktop)
+- ✅ Smooth animations and transitions
+- ✅ Modern iconography
+- ✅ Loading states with spinners
+- ✅ Modals and interactive dialogs
+
+### For Unauthenticated Users
+- ✅ View recent posts on main page (`/`)
+- ✅ Navigate to full posts page (`/posts`)
+- ✅ Filter posts by author using user selector
+- ✅ View complete post details
+
+### For Authenticated Users
+- ✅ All previous features, plus:
+- ✅ Create new posts ("Create Post" button)
+- ✅ Delete own posts (with confirmation modal)
+- ✅ Automatic access to `/posts` after login
+- ✅ Logout button in navigation bar
 
 ## 🌐 API Endpoints
 
 ### Posts
-- `GET /api/posts` - Lista todos los posts (con filtrado opcional por userId)
-- `POST /api/posts` - Crea un nuevo post (requiere autenticación)
-- `DELETE /api/posts/[id]` - Elimina un post (soft delete, requiere autenticación)
+- `GET /api/posts` - Lists all posts (with optional userId filtering)
+- `POST /api/posts` - Creates a new post (requires authentication)
+- `DELETE /api/posts/[id]` - Deletes a post (soft delete, requires authentication)
 
-### Autenticación
-- `POST /api/auth/signup` - Registro de usuario
-- `POST /api/auth/login` - Inicio de sesión
-- `POST /api/auth/logout` - Cierre de sesión
-- `GET /api/auth/me` - Verificar sesión actual
+### Authentication
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/me` - Check current session
 
-### Usuarios
-- `GET /api/users` - Lista todos los usuarios
+### Users
+- `GET /api/users` - Lists all users
 
-## 🔧 Configuración de Desarrollo
+## 🔧 Development Configuration
 
-### Variables de Entorno
+### Environment Variables
 ```env
-# Archivo .env en la raíz del proyecto
+# .env file in project root
 DATABASE_URL="file:./dev.db"
 ```
 
-### Base de Datos de Desarrollo
-- Archivo: `dev.db` (SQLite)
-- Ubicación: Raíz del proyecto
-- Se incluye automáticamente en el control de versiones
+### Development Database
+- File: `dev.db` (SQLite)
+- Location: Project root
+- Automatically included in version control
 
-## 🚀 Despliegue
+## 🚀 Deployment
 
-### Para Producción
+### For Production
 ```bash
-# Construir la aplicación
+# Build the application
 npm run build
 
-# Iniciar servidor de producción
+# Start production server
 npm run start
 ```
 
-### Variables de Entorno para Producción
-Asegúrate de configurar `DATABASE_URL` apuntando a tu base de datos de producción.
+## 📞 Support
 
-## 🤝 Contribuciones
+If you find any issues or have questions:
 
-1. Fork el proyecto
-2. Crea tu rama de feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Review the `assumptions.md` file to understand design decisions
+2. Check console logs for errors
 
-## 📝 Licencia
+## ⚠️ Project Scope Notes
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+### 🎯 **Basic Requirements** (Original)
+- ✅ NextJS + TypeScript
+- ✅ SQLite + Prisma ORM
+- ✅ Posts page with cards
+- ✅ Deletion with confirmation modal
+- ✅ Basic error handling
 
-## 📞 Soporte
-
-Si encuentras algún problema o tienes preguntas:
-
-1. Revisa el archivo `assumptions.md` para entender las decisiones de diseño
-2. Verifica los logs de la consola para errores
-3. Abre un issue en el repositorio de GitHub
+### 🚀 **Additional Improvements** (Not Required)
+- 🔐 Complete JWT authentication system
+- 🌓 Dark/light theme
+- 📜 Infinite scroll pagination
+- 🦴 Skeleton loading
+- 🍞 Toast notifications
+- 📱 Advanced UX for unstable connections
+- ⚡ Advanced HTTP error handling
 
 ---
 
-**Desarrollado con ❤️ usando Next.js, TypeScript y Prisma**
+**Built with ❤️ using Next.js, TypeScript, and Prisma**

@@ -1,77 +1,106 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useForm } from "@/lib/hooks";
+import { validatePostInput } from "@/lib/utils";
 
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPostCreated?: () => void;
+  onPostCreated?: (postData: { title: string; body: string }) => Promise<void>;
 }
 
-export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostModalProps) {
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function CreatePostModal({
+  isOpen,
+  onClose,
+  onPostCreated,
+}: CreatePostModalProps) {
   const router = useRouter();
 
-  const isFormValid = title.trim().length > 0 && body.trim().length > 0;
+  // Validation function that returns the format expected by useForm
+  const validateForm = (formData: { title: string; body: string }): Record<string, string> => {
+    const result = validatePostInput(formData);
+    const errors: Record<string, string> = {};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // Map validation errors to field-specific messages
+    if (!result.isValid) {
+      // For simplicity, we'll assign errors to specific fields based on content
+      // In a more complex scenario, you'd modify validatePostInput to return field-specific errors
+      if (result.errors.some(error => error.includes('Title'))) {
+        errors.title = result.errors.find(error => error.includes('Title')) || 'Title error';
+      }
+      if (result.errors.some(error => error.includes('Content'))) {
+        errors.body = result.errors.find(error => error.includes('Content')) || 'Content error';
+      }
+      // If we can't map specific errors, put them in a general field
+      if (Object.keys(errors).length === 0 && result.errors.length > 0) {
+        errors.title = result.errors[0]; // Default to title for backwards compatibility
+      }
+    }
 
-    if (!isFormValid) return;
+    return errors;
+  };
 
-    setIsSubmitting(true);
+  const { data, errors, isSubmitting, isValid, setValue, submit } = useForm(
+    { title: "", body: "" },
+    validateForm
+  );
 
-    try {
-      const response = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          body: body.trim(),
-        }),
+  const handleSubmit = async () => {
+    if (onPostCreated) {
+      await onPostCreated({
+        title: data.title.trim(),
+        body: data.body.trim(),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create post');
-      }
-
-      toast.success('Post created successfully!');
-
-      // Reset form
-      setTitle('');
-      setBody('');
-
-      // Close modal
+      // Toast is handled by the parent component
       onClose();
+    } else {
+      // Fallback to direct API call if no callback provided
+      try {
+        const response = await fetch("/api/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: data.title.trim(),
+            body: data.body.trim(),
+          }),
+        });
 
-      // Refresh the posts list
-      if (onPostCreated) {
-        onPostCreated();
-      } else {
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create post");
+        }
+
+        toast.success("Post created successfully");
+        onClose();
         router.refresh();
+      } catch (error) {
+        console.error("Error creating post:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Unable to create post. Please check your input and try again."
+        );
       }
-    } catch (error) {
-      console.error('Error creating post:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to create post');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setTitle('');
-      setBody('');
       onClose();
     }
   };
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset form data when modal closes
+      setValue('title', '');
+      setValue('body', '');
+    }
+  }, [isOpen, setValue]);
 
   if (!isOpen) return null;
 
@@ -83,37 +112,59 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
             Create New Post
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(handleSubmit);
+            }}
+            className="space-y-4"
+          >
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Title *
               </label>
               <input
                 type="text"
                 id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={data.title}
+                onChange={(e) => setValue("title", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
                 placeholder="Enter post title..."
                 required
                 disabled={isSubmitting}
               />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.title}
+                </p>
+              )}
             </div>
 
             <div>
-              <label htmlFor="body" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="body"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Content *
               </label>
               <textarea
                 id="body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
+                value={data.body}
+                onChange={(e) => setValue("body", e.target.value)}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white resize-vertical"
                 placeholder="Write your post content here..."
                 required
                 disabled={isSubmitting}
               />
+              {errors.body && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.body}
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3 justify-end pt-4">
@@ -127,10 +178,10 @@ export function CreatePostModal({ isOpen, onClose, onPostCreated }: CreatePostMo
               </button>
               <button
                 type="submit"
-                disabled={!isFormValid || isSubmitting}
+                disabled={!isValid || isSubmitting}
                 className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 cursor-pointer hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md transition-colors"
               >
-                {isSubmitting ? 'Creating...' : 'Create Post'}
+                {isSubmitting ? "Creating..." : "Create Post"}
               </button>
             </div>
           </form>
