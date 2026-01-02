@@ -12,7 +12,6 @@ export default function PostsPage() {
   const searchParams = useSearchParams();
   const currentUserId = searchParams.get("userId") || undefined;
 
-  // Use custom hooks for state management
   const {
     posts,
     loading: postsLoading,
@@ -34,18 +33,21 @@ export default function PostsPage() {
   const observerRef = useRef<HTMLDivElement>(null);
 
   // Handle infinite scroll
-  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries;
-    if (entry.isIntersecting && hasMore && !loadingMore && !postsLoading) {
-      loadMorePosts();
-    }
-  }, [hasMore, loadingMore, postsLoading, loadMorePosts]);
+  const handleIntersection = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && !loadingMore && !postsLoading) {
+        loadMorePosts();
+      }
+    },
+    [hasMore, loadingMore, postsLoading, loadMorePosts]
+  );
 
   // Setup intersection observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(handleIntersection, {
       root: null,
-      rootMargin: '100px',
+      rootMargin: "100px",
       threshold: 0.1,
     });
 
@@ -221,7 +223,9 @@ export default function PostsPage() {
                 {loadingMore ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600"></div>
-                    <p className="text-gray-500 dark:text-gray-400">Loading more posts...</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Loading more posts...
+                    </p>
                   </div>
                 ) : (
                   <div className="h-4"></div> // Invisible trigger element

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PostCard } from "@/components/PostCard";
-import { useAuthCheck } from '@/lib/hooks';
+import { useAuthCheck } from "@/lib/hooks";
 import type { PostWithAuthor } from "@/lib/models";
 
 interface HomeClientProps {
@@ -18,7 +18,7 @@ export function HomeClient({ recentPosts }: HomeClientProps) {
   // Redirect to posts if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/posts');
+      router.push("/posts");
     }
   }, [isAuthenticated, router]);
 

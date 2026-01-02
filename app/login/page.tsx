@@ -1,34 +1,34 @@
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { useAuth } from '@/lib/auth-context';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       const success = await login(email);
       if (success) {
-        toast.success('Welcome back! You have been logged in successfully.');
-        router.push('/');
+        toast.success("Welcome back! You have been logged in successfully.");
+        router.push("/");
       } else {
-        setError('User not found. Please check your email or sign up first.');
+        setError("User not found. Please check your email or sign up first.");
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setError('Network error. Please try again.');
+      console.error("Login error:", error);
+      setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +42,7 @@ export default function LoginPage() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            Or{" "}
             <Link
               href="/signup"
               className="font-medium text-emerald-500 hover:text-emerald-600"
@@ -85,7 +85,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>

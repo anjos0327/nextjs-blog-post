@@ -16,7 +16,6 @@ export type {
 export type {
   Post,
   CreatePostInput,
-  UpdatePostInput,
   PostWithAuthor,
   PostFilters,
   PostListResponse,

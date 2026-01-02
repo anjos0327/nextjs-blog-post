@@ -1,12 +1,14 @@
-'use client';
+"use client";
 
 interface PostSkeletonProps {
   className?: string;
 }
 
-export function PostSkeleton({ className = '' }: PostSkeletonProps) {
+export function PostSkeleton({ className = "" }: PostSkeletonProps) {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-pulse ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-pulse ${className}`}
+    >
       {/* Header with avatar and name */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">

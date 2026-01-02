@@ -1,64 +1,36 @@
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { useAuth } from '@/lib/auth-context';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSignup } from "@/lib/hooks";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    username: '',
+    email: "",
+    name: "",
+    username: "",
   });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
-  const { login } = useAuth();
+  const { signup, isLoading } = useSignup();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
+    setError("");
 
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Importante para incluir cookies
-        body: JSON.stringify(formData),
-      });
+    const result = await signup(formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('Account created successfully! Welcome to BlogApp.');
-        // Después del registro exitoso, hacer login automáticamente
-        const loginSuccess = await login(formData.email);
-        if (loginSuccess) {
-          router.push('/');
-        } else {
-          setError('Account created but failed to log in. Please try logging in manually.');
-        }
-      } else {
-        setError(data.error || 'An error occurred during registration');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setError('Network error. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      router.push("/");
     }
   };
 
@@ -70,7 +42,7 @@ export default function SignupPage() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
+            Or{" "}
             <Link
               href="/login"
               className="font-medium text-emerald-500 hover:text-emerald-600"
@@ -145,7 +117,7 @@ export default function SignupPage() {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Sign up'}
+              {isLoading ? "Creating account..." : "Sign up"}
             </button>
           </div>
         </form>

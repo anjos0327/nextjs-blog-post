@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { ValidationError } from '@/lib/utils';
-import type { CreatePostInput, UpdatePostInput, PostFilters, PostWithAuthor } from '@/lib/models';
+import type { CreatePostInput, PostFilters, PostWithAuthor } from '@/lib/models';
 
 /**
  * Post Service - Centralizes all post-related business logic
@@ -61,31 +61,6 @@ export class PostService {
   }
 
   /**
-   * Get a single post by ID
-   */
-  static async getPostById(id: number): Promise<PostWithAuthor | null> {
-    try {
-      const post = await prisma.post.findUnique({
-        where: { id },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-            },
-          },
-        },
-      });
-
-      return post;
-    } catch (error) {
-      console.error('Error fetching post:', error);
-      throw new Error('Failed to fetch post');
-    }
-  }
-
-  /**
    * Create a new post
    */
   static async createPost(userId: number, postData: CreatePostInput): Promise<PostWithAuthor> {
@@ -114,59 +89,6 @@ export class PostService {
     } catch (error) {
       console.error('Error creating post:', error);
       throw new Error('Failed to create post');
-    }
-  }
-
-  /**
-   * Update an existing post
-   */
-  static async updatePost(id: number, userId: number, postData: UpdatePostInput): Promise<PostWithAuthor> {
-    try {
-      // Check if post exists and belongs to user
-      const existingPost = await prisma.post.findFirst({
-        where: {
-          id,
-          userId,
-          deleted: false,
-        },
-      });
-
-      if (!existingPost) {
-        throw new Error('Post not found or access denied');
-      }
-
-      // Validate input
-      this.validateUpdatePostInput(postData);
-
-      const updateData: Record<string, unknown> = {};
-      if (postData.title !== undefined) {
-        updateData.title = postData.title.trim();
-      }
-      if (postData.body !== undefined) {
-        updateData.body = postData.body.trim();
-      }
-
-      const post = await prisma.post.update({
-        where: { id },
-        data: updateData,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-            },
-          },
-        },
-      });
-
-      return post;
-    } catch (error) {
-      console.error('Error updating post:', error);
-      if (error instanceof Error && error.message === 'Post not found or access denied') {
-        throw error;
-      }
-      throw new Error('Failed to update post');
     }
   }
 
@@ -208,37 +130,6 @@ export class PostService {
         throw error;
       }
       throw new Error('Failed to delete post');
-    }
-  }
-
-  /**
-   * Get posts by user ID
-   */
-  static async getPostsByUserId(userId: number): Promise<PostWithAuthor[]> {
-    try {
-      const posts = await prisma.post.findMany({
-        where: {
-          userId,
-          deleted: false,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-            },
-          },
-        },
-        orderBy: {
-          id: 'desc',
-        },
-      });
-
-      return posts;
-    } catch (error) {
-      console.error('Error fetching user posts:', error);
-      throw new Error('Failed to fetch user posts');
     }
   }
 
@@ -291,28 +182,6 @@ export class PostService {
     }
 
     if (input.body.trim().length < 10) {
-      throw new ValidationError('Body must be at least 10 characters long', 'body');
-    }
-  }
-
-  /**
-   * Validate post update input
-   * Private method following encapsulation principle
-   */
-  private static validateUpdatePostInput(input: UpdatePostInput): void {
-    if (input.title !== undefined && !input.title.trim()) {
-      throw new ValidationError('Title cannot be empty', 'title');
-    }
-
-    if (input.body !== undefined && !input.body.trim()) {
-      throw new ValidationError('Body cannot be empty', 'body');
-    }
-
-    if (input.title !== undefined && input.title.trim().length < 3) {
-      throw new ValidationError('Title must be at least 3 characters long', 'title');
-    }
-
-    if (input.body !== undefined && input.body.trim().length < 10) {
       throw new ValidationError('Body must be at least 10 characters long', 'body');
     }
   }
