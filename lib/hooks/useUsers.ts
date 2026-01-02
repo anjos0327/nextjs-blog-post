@@ -23,13 +23,14 @@ export function useUsers() {
       const response = await fetch('/api/users');
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch users');
       }
 
       const data = await response.json();
       setUsers(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load users';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to load user list. Please try again.';
       console.error('Error fetching users:', err);
       setError(errorMessage);
     } finally {

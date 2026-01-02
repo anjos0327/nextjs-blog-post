@@ -30,7 +30,7 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
       // Use callback if provided (preferred approach for component composition)
       if (onPostDeleted) {
         await onPostDeleted(post.id);
-        toast.success('Post deleted successfully!');
+        toast.success('Post deleted successfully');
         setShowModal(false);
       } else {
         // Fallback: direct API call (for standalone usage)
@@ -47,7 +47,7 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
             if (errorData && errorData.error) {
               errorMessage = errorData.error;
             } else {
-              errorMessage = `Failed to delete post (${response.status})`;
+              errorMessage = 'Failed to delete post';
             }
           } catch {
             // If we can't parse JSON, try to get text response
@@ -56,10 +56,10 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
               if (textResponse) {
                 errorMessage = textResponse;
               } else {
-                errorMessage = `Failed to delete post (${response.status})`;
+                errorMessage = 'Failed to delete post';
               }
             } catch {
-              errorMessage = `Failed to delete post (${response.status})`;
+              errorMessage = 'Failed to delete post';
             }
           }
 
@@ -67,7 +67,7 @@ export function PostCard({ post, showDelete = true, isAuthenticated = false, onP
         }
 
         // Show success notification
-        toast.success('Post deleted successfully!');
+        toast.success('Post deleted successfully');
         router.refresh();
         setShowModal(false);
       }

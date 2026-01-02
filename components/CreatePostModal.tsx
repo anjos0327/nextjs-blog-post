@@ -75,13 +75,13 @@ export function CreatePostModal({
           throw new Error(errorData.error || "Failed to create post");
         }
 
-        toast.success("Post created successfully!");
+        toast.success("Post created successfully");
         onClose();
         router.refresh();
       } catch (error) {
         console.error("Error creating post:", error);
         toast.error(
-          error instanceof Error ? error.message : "Failed to create post"
+          error instanceof Error ? error.message : "Unable to create post. Please check your input and try again."
         );
       }
     }

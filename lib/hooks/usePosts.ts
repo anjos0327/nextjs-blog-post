@@ -43,14 +43,15 @@ export function usePosts(initialFilters?: PostFilters) {
       const response = await fetch(`/api/posts?${queryParams.toString()}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch posts: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch posts');
       }
 
       const data: PostListResponse = await response.json();
       setPosts(data.posts);
       setHasMore(data.hasMore);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to load posts. Please check your connection and try again.';
       console.error('Error fetching posts:', err);
       setError(errorMessage);
     } finally {
@@ -81,7 +82,8 @@ export function usePosts(initialFilters?: PostFilters) {
       const response = await fetch(`/api/posts?${queryParams.toString()}`);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch more posts: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to load more posts');
       }
 
       const data: PostListResponse = await response.json();
@@ -91,7 +93,7 @@ export function usePosts(initialFilters?: PostFilters) {
       setHasMore(data.hasMore);
       setCurrentPage(nextPage);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load more posts';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to load more posts. Please try again.';
       console.error('Error loading more posts:', err);
       setError(errorMessage);
     } finally {
@@ -126,7 +128,7 @@ export function usePosts(initialFilters?: PostFilters) {
 
       return newPost.post;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create post';
+      const errorMessage = err instanceof Error ? err.message : 'Unable to create post. Please check your input and try again.';
       setError(errorMessage);
       throw err;
     }
@@ -151,21 +153,21 @@ export function usePosts(initialFilters?: PostFilters) {
         const errorData = await response.json();
         if (errorData && errorData.error) {
           errorMessage = errorData.error;
+      } else {
+        errorMessage = 'Failed to delete post';
+      }
+    } catch {
+      // If we can't parse JSON, try to get text response
+      try {
+        const textResponse = await response.text();
+        if (textResponse) {
+          errorMessage = textResponse;
         } else {
-          errorMessage = `Failed to delete post (${response.status})`;
+          errorMessage = 'Failed to delete post';
         }
       } catch {
-        // If we can't parse JSON, try to get text response
-        try {
-          const textResponse = await response.text();
-          if (textResponse) {
-            errorMessage = textResponse;
-          } else {
-            errorMessage = `Failed to delete post (${response.status})`;
-          }
-        } catch {
-          errorMessage = `Failed to delete post (${response.status})`;
-        }
+        errorMessage = 'Failed to delete post';
+      }
       }
 
       throw new Error(errorMessage);
@@ -202,14 +204,15 @@ export function usePosts(initialFilters?: PostFilters) {
         const response = await fetch(`/api/posts?${queryParams.toString()}`);
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.status} ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch posts');
         }
 
         const data: PostListResponse = await response.json();
         setPosts(data.posts);
         setHasMore(data.hasMore);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load posts';
+        const errorMessage = err instanceof Error ? err.message : 'Unable to load posts. Please try again.';
         console.error('Error fetching posts:', err);
         setError(errorMessage);
       } finally {
