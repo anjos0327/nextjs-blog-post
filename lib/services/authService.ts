@@ -110,20 +110,6 @@ export class AuthService {
   }
 
   /**
-   * Refresh user token (extend expiration)
-   */
-  static async refreshToken(user: UserPayload): Promise<string> {
-    try {
-      const token = createToken(user);
-      await setAuthCookie(token);
-      return token;
-    } catch (error) {
-      console.error('Error refreshing token:', error);
-      throw new Error('Failed to refresh token');
-    }
-  }
-
-  /**
    * Validate login input
    * Private method following encapsulation principle
    */

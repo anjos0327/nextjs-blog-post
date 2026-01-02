@@ -153,27 +153,26 @@ export function usePosts(initialFilters?: PostFilters) {
         const errorData = await response.json();
         if (errorData && errorData.error) {
           errorMessage = errorData.error;
-      } else {
-        errorMessage = 'Failed to delete post';
-      }
-    } catch {
-      // If we can't parse JSON, try to get text response
-      try {
-        const textResponse = await response.text();
-        if (textResponse) {
-          errorMessage = textResponse;
         } else {
           errorMessage = 'Failed to delete post';
         }
       } catch {
-        errorMessage = 'Failed to delete post';
-      }
+        // If we can't parse JSON, try to get text response
+        try {
+          const textResponse = await response.text();
+          if (textResponse) {
+            errorMessage = textResponse;
+          } else {
+            errorMessage = 'Failed to delete post';
+          }
+        } catch {
+          errorMessage = 'Failed to delete post';
+        }
       }
 
       throw new Error(errorMessage);
     }
 
-    // Remove post from the list - success
     setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
   }, []);
 
@@ -187,7 +186,6 @@ export function usePosts(initialFilters?: PostFilters) {
     setCurrentPage(1);
     setHasMore(true);
 
-    // Fetch posts directly without using the callback to avoid dependency loop
     const fetchPostsDirectly = async () => {
       try {
         setLoading(true);
@@ -221,7 +219,7 @@ export function usePosts(initialFilters?: PostFilters) {
     };
 
     fetchPostsDirectly();
-  }, []); // No dependencies - uses ref instead
+  }, []);
 
   /**
    * Clear error state
@@ -236,9 +234,7 @@ export function usePosts(initialFilters?: PostFilters) {
   const refresh = useCallback(() => {
     fetchPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Remove fetchPosts dependency to avoid infinite loop
-
-  // No initial fetch - let the component control when to fetch
+  }, []);
 
   return {
     posts,

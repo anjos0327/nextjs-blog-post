@@ -40,7 +40,7 @@ export function useAuthCheck() {
         setUser(null);
         setIsAuthenticated(false);
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
@@ -118,7 +118,7 @@ export function useAuthCheck() {
   useEffect(() => {
     checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Remove checkAuth dependency to avoid infinite loops
+  }, []);
 
   return {
     user,

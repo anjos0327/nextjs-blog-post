@@ -308,5 +308,3 @@ If you find any issues or have questions:
 - ⚡ Advanced HTTP error handling
 
 ---
-
-**Built with ❤️ using Next.js, TypeScript, and Prisma**
