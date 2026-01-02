@@ -18,9 +18,11 @@ model User {
 }
 
 model Post {
-  id     Int    @id @default(autoincrement())
-  title  String
-  body   String
-  userId Int
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  title     String
+  body      String
+  userId    Int
+  deleted   Boolean   @default(false)
+  deletedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

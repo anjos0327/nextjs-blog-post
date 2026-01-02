@@ -1,26 +1,93 @@
+/* stylelint-disable at-rule-no-unknown */
+/* Tailwind CSS v4 custom theme configuration */
 @import "tailwindcss";
 
+/* ===========================================
+   CSS Custom Properties (Design Tokens)
+   =========================================== */
+
+/* Light Mode Colors */
 :root {
+  /* Base colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Custom Emerald Color Palette - Light Mode */
+  --color-emerald-50: #effef6;
+  --color-emerald-100: #dbfdec;
+  --color-emerald-200: #b9f9d9;
+  --color-emerald-300: #82f3bd;
+  --color-emerald-400: #44e498;
+  --color-emerald-500: #1bcc78;
+  --color-emerald-600: #12bc6c;
+  --color-emerald-700: #11844e;
+  --color-emerald-800: #136841;
+  --color-emerald-900: #115637;
+  --color-emerald-950: #03301d;
 }
 
+/* Dark Mode Colors */
+.dark {
+  /* Base colors */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Custom Emerald Color Palette - Dark Mode
+     More saturated and brighter for better contrast on dark backgrounds */
+  --color-emerald-50: #e6fff5;
+  --color-emerald-100: #d1ffea;
+  --color-emerald-200: #a7fdd4;
+  --color-emerald-300: #6ff7b5;
+  --color-emerald-400: #34f093;
+  --color-emerald-500: #10e66c;
+  --color-emerald-600: #09d15c;
+  --color-emerald-700: #0caf4f;
+  --color-emerald-800: #0d8f42;
+  --color-emerald-900: #0e7538;
+  --color-emerald-950: #052e1a;
+}
+
+/* ===========================================
+   Tailwind CSS v4 Theme Configuration
+   =========================================== */
+
 @theme inline {
+  /* Base theme variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ===========================================
+   Base Styles
+   =========================================== */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===========================================
+   Utility Classes
+   =========================================== */
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Toast Notifications */
+:root {
+  --toast-bg: #ffffff;
+  --toast-text: #171717;
+}
+
+.dark {
+  --toast-bg: #374151;
+  --toast-text: #f9fafb;
 }
