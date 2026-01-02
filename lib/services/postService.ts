@@ -11,10 +11,6 @@ import type { CreatePostInput, UpdatePostInput, PostFilters, PostWithAuthor } fr
  * - Authorization checks
  * - Data transformation
  *
- * SOLID Principles applied:
- * - Single Responsibility: Only handles post-related operations
- * - Open/Closed: New post features can be added without modifying existing methods
- * - Dependency Inversion: Uses abstractions (Prisma types) instead of direct database access
  */
 export class PostService {
   /**

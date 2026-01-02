@@ -4,12 +4,6 @@ import type { User, CreateUserInput, UserProfile } from '@/lib/models';
 
 /**
  * User Service - Centralizes all user-related business logic
- *
- * This service follows SOLID principles:
- * - Single Responsibility: Only handles user operations (CRUD, validation, etc.)
- * - Open/Closed: Extensible through service methods without modifying existing code
- * - Dependency Inversion: Depends on abstractions (Prisma types) rather than concretions
- *
  * All database operations related to users should go through this service.
  */
 export class UserService {

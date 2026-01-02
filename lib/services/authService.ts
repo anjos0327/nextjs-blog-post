@@ -12,10 +12,6 @@ import type { UserPayload, LoginUserInput, CreateUserInput } from '@/lib/models'
  * - Session creation and validation
  * - User registration with validation
  *
- * SOLID Principles:
- * - Single Responsibility: Only handles authentication concerns
- * - Interface Segregation: Clean, focused methods for different auth operations
- * - Dependency Inversion: Depends on other services through their interfaces
  */
 export class AuthService {
   /**
