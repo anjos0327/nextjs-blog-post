@@ -27,7 +27,7 @@ export function verifyToken(token: string): UserPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -55,7 +55,11 @@ export async function clearAuthCookie() {
 
 export async function getCurrentUser(): Promise<UserPayload | null> {
   const token = await getTokenFromCookies();
-  if (!token) return null;
 
-  return verifyToken(token);
+  if (!token) {
+    return null;
+  }
+
+  const verified = verifyToken(token);
+  return verified;
 }

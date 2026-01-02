@@ -1,5 +1,7 @@
-import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { PostService } from '@/lib/services';
+import { getCurrentUser } from '@/lib/auth';
+import { handleApiError, AuthenticationError, ValidationError } from '@/lib/utils';
 
 interface RouteParams {
   params: Promise<{
@@ -7,6 +9,10 @@ interface RouteParams {
   }>;
 }
 
+/**
+ * DELETE /api/posts/[id]
+ * Soft deletes a post (only by the post author)
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
@@ -16,42 +22,50 @@ export async function DELETE(
     const postId = parseInt(id);
 
     if (isNaN(postId)) {
-      return NextResponse.json(
-        { error: 'Invalid post ID' },
-        { status: 400 }
-      );
+      throw new ValidationError('Invalid post ID');
     }
 
-    // Check if post exists
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-    });
-
-    if (!post) {
-      return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
-      );
+    // Authenticate user
+    const user = await getCurrentUser();
+    if (!user) {
+      throw new AuthenticationError();
     }
 
-    // Soft delete the post
-    await prisma.post.update({
-      where: { id: postId },
-      data: {
-        deleted: true,
-        deletedAt: new Date(),
-      },
-    });
+    // Delete post using service
+    await PostService.deletePost(postId, user.id);
 
     return NextResponse.json(
-      { message: 'Post deleted successfully' },
-      { status: 200 }
+      { message: 'Post deleted successfully' }
     );
+
   } catch (error) {
-    console.error('Error deleting post:', error);
+    // Handle specific error messages with appropriate status codes
+    if (error instanceof Error) {
+      if (error.message === 'You can only delete your own posts') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 403 } // Forbidden
+        );
+      }
+      if (error.message === 'Post not found') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 404 } // Not Found
+        );
+      }
+      if (error.message === 'Post has already been deleted') {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 410 } // Gone
+        );
+      }
+    }
+
+    // Fallback to generic error handling
+    const { error: errorMessage, statusCode } = handleApiError(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }

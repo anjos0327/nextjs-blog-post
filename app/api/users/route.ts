@@ -1,25 +1,23 @@
-import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { UserService } from '@/lib/services';
+import { handleApiError } from '@/lib/utils';
 
+/**
+ * GET /api/users
+ * Retrieves all users (for filtering purposes)
+ */
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        username: true,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
+    // Get all users using service
+    const users = await UserService.getAllUsers();
 
     return NextResponse.json(users);
+
   } catch (error) {
-    console.error('Error fetching users:', error);
+    const { error: errorMessage, statusCode } = handleApiError(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }

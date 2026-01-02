@@ -3,22 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-  userId: number;
-  user: {
-    name: string;
-    username: string;
-  };
-}
+import { useAuthCheck } from '@/lib/hooks';
+import type { PostWithAuthor } from '@/lib/models';
 
 interface PostCardProps {
-  post: Post;
+  post: PostWithAuthor;
   showDelete?: boolean;
-  onPostDeleted?: () => void;
+  /**
+   * Callback function called when a post is successfully deleted.
+   * Receives the deleted post's ID as parameter.
+   */
+  onPostDeleted?: (postId: number) => void;
 }
 
 export function PostCard({ post, showDelete = true, onPostDeleted }: PostCardProps) {
@@ -26,30 +21,57 @@ export function PostCard({ post, showDelete = true, onPostDeleted }: PostCardPro
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { isAuthenticated } = useAuthCheck();
 
   const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/posts/${post.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete post');
-      }
-
-      // Show success notification
-      toast.success('Post deleted successfully!');
-
-      // Refresh the page to update the list
+      // Use callback if provided (preferred approach for component composition)
       if (onPostDeleted) {
-        onPostDeleted();
+        await onPostDeleted(post.id);
+        toast.success('Post deleted successfully!');
+        setShowModal(false);
       } else {
+        // Fallback: direct API call (for standalone usage)
+        const response = await fetch(`/api/posts/${post.id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          let errorMessage = 'Failed to delete post';
+
+          // Try to get specific error message from server
+          try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+            } else {
+              errorMessage = `Failed to delete post (${response.status})`;
+            }
+          } catch {
+            // If we can't parse JSON, try to get text response
+            try {
+              const textResponse = await response.text();
+              if (textResponse) {
+                errorMessage = textResponse;
+              } else {
+                errorMessage = `Failed to delete post (${response.status})`;
+              }
+            } catch {
+              errorMessage = `Failed to delete post (${response.status})`;
+            }
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        // Show success notification
+        toast.success('Post deleted successfully!');
         router.refresh();
+        setShowModal(false);
       }
-      setShowModal(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
@@ -71,7 +93,7 @@ export function PostCard({ post, showDelete = true, onPostDeleted }: PostCardPro
               By: {post.user.name} (@{post.user.username})
             </p>
           </div>
-          {showDelete && (
+          {showDelete && isAuthenticated && (
             <button
               onClick={() => setShowModal(true)}
               className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900 rounded-md transition-colors cursor-pointer"

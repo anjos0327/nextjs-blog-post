@@ -1,15 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-}
+import type { User } from '@/lib/models';
 
 interface PostFilterProps {
-  users: User[];
+  users: Pick<User, 'id' | 'name' | 'username'>[];
   currentUserId?: string;
 }
 

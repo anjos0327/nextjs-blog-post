@@ -1,115 +1,70 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PostCard } from "@/components/PostCard";
 import { PostFilter } from "@/components/PostFilter";
 import { CreatePostModal } from "@/components/CreatePostModal";
-
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-  userId: number;
-  user: {
-    name: string;
-    username: string;
-  };
-}
-
-interface User {
-  id: number;
-  name: string;
-  username: string;
-}
+import { usePosts, useUsers, useAuthCheck } from "@/lib/hooks";
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [postsError, setPostsError] = useState<string | null>(null);
-  const [usersError, setUsersError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const currentUserId = searchParams.get('userId') || undefined;
+  const currentUserId = searchParams.get("userId") || undefined;
 
-  const fetchPosts = useCallback(async () => {
-    try {
-      setPostsError(null);
-      const postsResponse = await fetch(`/api/posts?userId=${currentUserId || ''}`);
+  // Use custom hooks for state management
+  const {
+    posts,
+    loading: postsLoading,
+    error: postsError,
+    createPost,
+    deletePost,
+    updateFilters,
+    clearError,
+    refresh,
+  } = usePosts();
 
-      if (!postsResponse.ok) {
-        throw new Error(`Failed to fetch posts: ${postsResponse.status} ${postsResponse.statusText}`);
-      }
+  const { users, error: usersError } = useUsers();
+  const { isAuthenticated } = useAuthCheck();
 
-      const postsData = await postsResponse.json();
-      setPosts(postsData);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load posts';
-      console.error('Error fetching posts:', error);
-      setPostsError(errorMessage);
-    }
-  }, [currentUserId]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // Initial fetch and update filters when currentUserId changes
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        setPostsError(null);
-        setUsersError(null);
+    updateFilters({
+      userId: currentUserId ? parseInt(currentUserId) : undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId]); // Remove updateFilters from dependencies to avoid infinite loop
 
-        // Fetch posts
-        await fetchPosts();
-
-        // Fetch users
-        try {
-          const usersResponse = await fetch('/api/users');
-          if (!usersResponse.ok) {
-            throw new Error(`Failed to fetch users: ${usersResponse.status} ${usersResponse.statusText}`);
-          }
-          const usersData = await usersResponse.json();
-          setUsers(usersData);
-        } catch (usersFetchError) {
-          const errorMessage = usersFetchError instanceof Error ? usersFetchError.message : 'Failed to load users';
-          console.error('Error fetching users:', usersFetchError);
-          setUsersError(errorMessage);
-        }
-
-        // Check if user is logged in
-        try {
-          const authResponse = await fetch('/api/auth/me');
-          setIsLoggedIn(authResponse.ok);
-        } catch (authError) {
-          console.error('Error checking authentication:', authError);
-          // Authentication errors don't prevent the page from working
-        }
-      } catch (error) {
-        console.error('Error in fetchData:', error);
-      } finally {
-        setLoading(false);
-      }
+  const handlePostCreated = async (postData: {
+    title: string;
+    body: string;
+  }) => {
+    try {
+      await createPost(postData);
+      setShowCreateModal(false);
+    } catch {
+      // Error is handled by the hook
     }
-
-    fetchData();
-  }, [currentUserId, fetchPosts]);
-
-  const handlePostCreated = async () => {
-    await fetchPosts();
   };
 
-  const handlePostDeleted = async () => {
-    setPostsError(null); // Clear any previous errors
-    await fetchPosts();
+  const handlePostDeleted = async (postId: number) => {
+    try {
+      await deletePost(postId);
+    } catch {
+      // Error is handled by the hook
+    }
   };
 
-  if (loading) {
+  if (postsLoading) {
     return (
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-            <p className="text-gray-500 dark:text-gray-400 mt-4">Loading posts...</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-4">
+              Loading posts...
+            </p>
           </div>
         </div>
       </div>
@@ -131,8 +86,8 @@ export default function PostsPage() {
               </p>
               <button
                 onClick={() => {
-                  setPostsError(null);
-                  fetchPosts();
+                  clearError();
+                  refresh();
                 }}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors cursor-pointer"
               >
@@ -153,7 +108,7 @@ export default function PostsPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Blog Posts
             </h1>
-            {isLoggedIn && (
+            {isAuthenticated && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-medium rounded-md transition-colors cursor-pointer"
@@ -163,10 +118,7 @@ export default function PostsPage() {
             )}
           </div>
           <div className="mt-4">
-            <PostFilter
-              users={users}
-              currentUserId={currentUserId}
-            />
+            <PostFilter users={users} currentUserId={currentUserId} />
           </div>
         </div>
 
@@ -176,8 +128,16 @@ export default function PostsPage() {
             <div className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  <svg
+                    className="h-5 w-5 text-yellow-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -201,7 +161,11 @@ export default function PostsPage() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} onPostDeleted={handlePostDeleted} />
+              <PostCard
+                key={post.id}
+                post={post}
+                onPostDeleted={handlePostDeleted}
+              />
             ))}
           </div>
         )}

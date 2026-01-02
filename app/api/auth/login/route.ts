@@ -1,56 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { createToken, setAuthCookie } from '@/lib/auth';
+import { AuthService } from '@/lib/services';
+import { handleApiError } from '@/lib/utils';
+import type { AuthLoginRequest } from '@/lib/types';
 
+/**
+ * POST /api/auth/login
+ * Authenticates a user and creates a session
+ */
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const body: AuthLoginRequest = await request.json();
 
-    // Validar que el email esté presente
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
-    }
+    // Authenticate user using service
+    const userPayload = await AuthService.login(body);
 
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
+    // Create authentication session
+    await AuthService.createAuthSession(userPayload);
 
-    // Buscar el usuario por email
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        email: true,
-      }
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const token = createToken(user);
-    await setAuthCookie(token);
-
-    return NextResponse.json(user);
+    return NextResponse.json(userPayload);
 
   } catch (error) {
-    console.error('Error logging in:', error);
+    const { error: errorMessage, statusCode } = handleApiError(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }
